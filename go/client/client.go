@@ -304,13 +304,14 @@ func (c *Client) query(server *config.Server, chain *config.Chain) (*timeSample,
 		Reply:         reply,
 	})
 
+	queryDurationBig := new(big.Int).SetInt64(int64(queryDuration/time.Microsecond))
 	bigRadius := new(big.Int).SetUint64(uint64(radius))
 	min := new(big.Int).SetUint64(midpoint)
 	min.Sub(min, bigRadius)
+	min.Sub(min, queryDurationBig)
 
 	max := new(big.Int).SetUint64(midpoint)
 	max.Add(max, bigRadius)
-	max.Add(max, new(big.Int).SetInt64(int64(queryDuration/time.Microsecond)))
 
 	return &timeSample{
 		server: server,
