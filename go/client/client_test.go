@@ -17,6 +17,7 @@ package main
 import (
 	"crypto/rand"
 	"encoding/json"
+	"math/big"
 	"net"
 	"strconv"
 	"sync"
@@ -332,4 +333,57 @@ func startServer(wg *sync.WaitGroup, span timeSpan) (*serverHandle, error) {
 		publicKey: rootPublic,
 		addr:      localAddr,
 	}, nil
+}
+
+func TestFindNOverlapping(t *testing.T) {
+	type sample struct {
+		min int64
+		max int64
+	}
+	testcases := []struct {
+		samples []sample
+		maxN    int
+	}{
+		{
+			samples: []sample{
+				{0, 2},
+				{1, 3},
+			},
+			maxN: 2,
+		},
+		{
+			samples: []sample{
+				{0, 2},
+				{1, 3},
+				{4, 5},
+			},
+			maxN: 2,
+		},
+		{
+			samples: []sample{
+				{0, 10},
+				{1, 2},
+				{5, 10},
+				{6, 10},
+			},
+			maxN: 3,
+		},
+	}
+	for i, tc := range testcases {
+		samples := make([]*timeSample, len(tc.samples))
+		for j, s := range tc.samples {
+			samples[j] = &timeSample{
+				base: big.NewInt(0),
+				min:  big.NewInt(s.min),
+				max:  big.NewInt(s.max),
+			}
+		}
+		for n := 1; n <= len(samples); n++ {
+			expectedOk := n <= tc.maxN
+			_, ok := findNOverlapping(samples, n)
+			if ok != expectedOk {
+				t.Errorf("#%d: findNOverlapping(n=%d) returned %v, wanted %v", i, n, ok, expectedOk)
+			}
+		}
+	}
 }

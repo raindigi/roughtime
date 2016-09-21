@@ -206,21 +206,14 @@ func (s *timeSample) alignTo(reference *timeSample) {
 	s.max.Sub(s.max, delta)
 }
 
+// contains returns true iff p belongs to s
+func (s *timeSample) contains(p *big.Int) bool {
+	return s.max.Cmp(p) >= 0 && s.min.Cmp(p) <= 0
+}
+
 // overlaps returns true iff s and other have any timespan in common.
 func (s *timeSample) overlaps(other *timeSample) bool {
 	return s.max.Cmp(other.min) >= 0 && other.max.Cmp(s.min) >= 0
-}
-
-// overlapsAll returns true iff s has s timespan in common with all of the
-// elements of others.
-func (s *timeSample) overlapsAll(others []*timeSample) bool {
-	for _, other := range others {
-		if !s.overlaps(other) {
-			return false
-		}
-	}
-
-	return true
 }
 
 // query sends a request to s, appends it to chain, and returns the resulting
@@ -415,10 +408,10 @@ func intersection(samples []*timeSample) *timeSample {
 
 	for _, sample := range samples[1:] {
 		if ret.min.Cmp(sample.min) < 0 {
-			sample.min.Set(ret.min)
+			ret.min.Set(sample.min)
 		}
 		if ret.max.Cmp(sample.max) > 0 {
-			sample.max.Set(ret.max)
+			ret.max.Set(sample.max)
 		}
 	}
 
@@ -437,11 +430,13 @@ func findNOverlapping(samples []*timeSample, n int) (sampleIntersection *timeSam
 
 	overlapping := make([]*timeSample, 0, n)
 
-	for i, initial := range samples {
-		overlapping = append(overlapping, initial)
+	for _, initial := range samples {
+		// An intersection of any subset of intervals will be an interval that contains
+		// the starting point of one of the intervals (possibly as its own starting point).
+		point := initial.min
 
-		for _, candidate := range samples[i+1:] {
-			if candidate.overlapsAll(overlapping) {
+		for _, candidate := range samples {
+			if candidate.contains(point) {
 				overlapping = append(overlapping, candidate)
 			}
 
