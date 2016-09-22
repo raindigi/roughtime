@@ -102,7 +102,7 @@ Parser::Parser(const uint8_t *req, size_t len) {
 
 static int tag_cmp(const void *keyp, const void *memberp) {
   tag_t key, member;
-  memcpy(&key, keyp, sizeof(uint32_t));
+  memcpy(&key, keyp, sizeof(tag_t));
   memcpy(&member, memberp, sizeof(uint32_t));
 
   if (key == member) {

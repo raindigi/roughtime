@@ -19,6 +19,10 @@
 
 #include <utility>
 
+#include "protocol.h"
+
+namespace roughtime {
+
 // TimeSource is an interface that can provide the current time.
 class TimeSource {
  public:
@@ -26,7 +30,9 @@ class TimeSource {
 
   // Now returns the midpoint time in epoch-microseconds and a radius of
   // uncertainty.
-  virtual std::pair<uint64_t, uint32_t> Now() = 0;
+  virtual std::pair<rough_time_t, uint32_t> Now() = 0;
 };
+
+}  // namespace roughtime
 
 #endif  // SECURITY_ROUGHTIME_TIME_SOURCE_H_

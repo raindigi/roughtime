@@ -42,7 +42,7 @@ constexpr size_t kCertSize =
 // TODO(mab): Find better home for this, likely in an offline tool.
 bool CreateCertificate(uint8_t out_cert[kCertSize],
                        const uint8_t root_private_key[ED25519_PRIVATE_KEY_LEN],
-                       uint64_t start_time, uint64_t end_time,
+                       rough_time_t start_time, rough_time_t end_time,
                        const uint8_t public_key[ED25519_PUBLIC_KEY_LEN]);
 
 // Identity is a server's private key and certificate.  (The certificate is the

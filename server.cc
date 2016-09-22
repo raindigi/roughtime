@@ -81,7 +81,7 @@ bool Server::Sign() {
   // The signature is over the root hash and the timestamp---that's it!
   tree_.Build(num_leaves_);
   const auto interval = time_source_->Now();
-  const uint64_t now = interval.first;
+  const rough_time_t now = interval.first;
   const uint32_t radius = interval.second;
 
   Builder to_be_signed(to_be_signed_, kToBeSignedSize, 3);
@@ -140,7 +140,7 @@ bool Server::MakeResponse(uint8_t *out_response, size_t *out_len,
 // static
 bool CreateCertificate(uint8_t out_cert[kCertSize],
                        const uint8_t root_private_key[ED25519_PRIVATE_KEY_LEN],
-                       uint64_t start_time, uint64_t end_time,
+                       rough_time_t start_time, rough_time_t end_time,
                        const uint8_t public_key[ED25519_PUBLIC_KEY_LEN]) {
   GOOGLE_CHECK_LT(start_time, end_time);
   uint8_t to_be_signed_bytes[sizeof(kCertContextString) + kToBeSignedCertSize];
