@@ -44,6 +44,7 @@ cc_test(
 cc_library(
     name = "time_source",
     hdrs = ["time_source.h"],
+    deps = [":protocol"],
 )
 
 cc_library(

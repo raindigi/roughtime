@@ -42,7 +42,7 @@ std::string CreateRequest(const uint8_t nonce[kNonceLength]) {
   return std::string(reinterpret_cast<char*>(query_bytes), query_len);
 }
 
-bool ParseResponse(uint64_t* out_time, uint32_t* out_radius,
+bool ParseResponse(rough_time_t* out_time, uint32_t* out_radius,
                    std::string* out_error,
                    const uint8_t root_public_key[ED25519_PUBLIC_KEY_LEN],
                    const uint8_t* response_bytes, size_t response_len,
@@ -94,7 +94,7 @@ bool ParseResponse(uint64_t* out_time, uint32_t* out_radius,
   }
 
   const uint8_t* delegated_public_key;
-  uint64_t min_time, max_time;
+  rough_time_t min_time, max_time;
   Parser delegation(delegation_bytes, delegation_len);
   if (!delegation.is_valid() ||
       !delegation.Get(&min_time, kTagMINT) ||
@@ -144,7 +144,7 @@ bool ParseResponse(uint64_t* out_time, uint32_t* out_radius,
   }
 
   const uint8_t* root;
-  uint64_t timestamp;
+  rough_time_t timestamp;
   uint32_t radius;
   if (!signed_response.GetFixedLen(&root, kTagROOT, kNonceLength) ||
       !signed_response.Get(&timestamp, kTagMIDP) ||

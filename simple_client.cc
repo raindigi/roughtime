@@ -269,7 +269,7 @@ int main(int argc, char** argv) {
     return kExitNetworkError;
   }
 
-  uint64_t timestamp;
+  roughtime::rough_time_t timestamp;
   uint32_t radius;
   std::string error;
   if (!roughtime::ParseResponse(

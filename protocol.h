@@ -35,6 +35,13 @@ constexpr size_t kRadiusSize = 4;  // Size of the server's uncertainty.
 
 typedef uint32_t tag_t;
 
+// rough_time_t is the type of a time stamp. Time is UTC and is given as
+// milliseconds since the UNIX epoch (00:00:00 UTC on 1 January 1970). Leap
+// seconds are linearly smeared over a 24-hour period. That is, the smear
+// extends from UTC noon to noon over 86,401 or 86,399 SI seconds, and all the
+// smeared seconds are the same length.
+typedef uint64_t rough_time_t;
+
 // MakeTag creates an integer value representing a tag.  Requests and responses
 // in the time protocol are made up of tagged data, QUIC-style.  Tags are 4
 // bytes long and meant to be readable-ish, but they cannot be chosen with

@@ -24,7 +24,7 @@ SystemTimeSource::SystemTimeSource() {}
 
 SystemTimeSource::~SystemTimeSource() {}
 
-std::pair<uint64_t, uint32_t> SystemTimeSource::Now() {
+std::pair<rough_time_t, uint32_t> SystemTimeSource::Now() {
   struct timespec ts;
   GOOGLE_CHECK_EQ(0, clock_gettime(CLOCK_REALTIME_COARSE, &ts));
   uint64_t now = ts.tv_sec;

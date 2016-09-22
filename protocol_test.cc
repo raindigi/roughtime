@@ -25,8 +25,7 @@ constexpr tag_t kTagTAG3 = MakeTag('T', 'A', 'G', '3');
 constexpr tag_t kTagTAG4 = MakeTag('T', 'A', 'G', '4');
 
 TEST(ParserTest, Success) {
-  alignas(4) uint8_t buffer[] = {
-      0x00,                    // misalign the buffer
+  const uint8_t buffer[] = {
       0x03, 0x00, 0x00, 0x00,  // 3 tags
       0x04, 0x00, 0x00, 0x00,  // tag #2 has offset 4
       0x08, 0x00, 0x00, 0x00,  // tag #3 has offset 8
@@ -38,7 +37,7 @@ TEST(ParserTest, Success) {
       0x33, 0x33, 0x33, 0x33,  // data for tag #3
   };
 
-  Parser parser(buffer + 1, sizeof(buffer) - 1);
+  Parser parser(buffer, sizeof(buffer));
   EXPECT_TRUE(parser.is_valid());
   const uint8_t* datap;
   size_t len;
@@ -65,6 +64,42 @@ TEST(ParserTest, Success) {
   datap = nullptr;
   EXPECT_TRUE(parser.GetFixedLen(&datap, kTagTAG3, 4));
   EXPECT_TRUE(memcmp("\x33\x33\x33\x33", datap, len) == 0);
+  datap = nullptr;
+
+  EXPECT_FALSE(parser.GetTag(&datap, &len, kTagTAG4));
+  EXPECT_FALSE(parser.GetFixedLen(&datap, kTagTAG4, 1));
+}
+
+TEST(ParserTest, UnalignedInput) {
+  alignas(4) const uint8_t buffer[] = {
+      0x00,                    // unalign input.
+      0x02, 0x00, 0x00, 0x00,  // 2 tags
+      0x04, 0x00, 0x00, 0x00,  // tag #2 has offset 4
+      0x54, 0x41, 0x47, 0x31,  // TAG1
+      0x54, 0x41, 0x47, 0x32,  // TAG2
+      0x11, 0x11, 0x11, 0x11,  // data for tag #1
+      0x22, 0x22, 0x22, 0x22,  // data for tag #2
+  };
+
+  Parser parser(buffer + 1, sizeof(buffer) - 1);
+  EXPECT_TRUE(parser.is_valid());
+  const uint8_t* datap;
+  size_t len;
+
+  EXPECT_TRUE(parser.GetTag(&datap, &len, kTagTAG1));
+  EXPECT_EQ(4, len);
+  EXPECT_TRUE(memcmp("\x11\x11\x11\x11", datap, len) == 0);
+  datap = nullptr;
+  EXPECT_TRUE(parser.GetFixedLen(&datap, kTagTAG1, 4));
+  EXPECT_TRUE(memcmp("\x11\x11\x11\x11", datap, len) == 0);
+  datap = nullptr;
+
+  EXPECT_TRUE(parser.GetTag(&datap, &len, kTagTAG2));
+  EXPECT_EQ(4, len);
+  EXPECT_TRUE(memcmp("\x22\x22\x22\x22", datap, len) == 0);
+  datap = nullptr;
+  EXPECT_TRUE(parser.GetFixedLen(&datap, kTagTAG2, 4));
+  EXPECT_TRUE(memcmp("\x22\x22\x22\x22", datap, len) == 0);
   datap = nullptr;
 
   EXPECT_FALSE(parser.GetTag(&datap, &len, kTagTAG4));

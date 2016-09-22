@@ -60,7 +60,8 @@ int main(int argc, char **argv) {
   std::unique_ptr<roughtime::Identity> identity =
       roughtime::SimpleServer::MakeIdentity(root_private_key, 0,
                                             2147483647000000);
-  std::unique_ptr<TimeSource> time_source(new roughtime::SystemTimeSource);
+  std::unique_ptr<roughtime::TimeSource> time_source(
+      new roughtime::SystemTimeSource);
 
   auto server =
       std::unique_ptr<roughtime::SimpleServer>(new roughtime::SimpleServer(

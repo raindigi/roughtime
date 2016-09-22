@@ -75,18 +75,18 @@ struct ResponseBuilder {
   size_t response_len;
 
   std::string out_error;
-  uint64_t out_time;
+  rough_time_t out_time;
   uint32_t out_radius;
 
   // Call the below functions in order to create a response.
   ResponseBuilder();
-  void MakeDelegation(uint64_t mint, uint64_t maxt);
+  void MakeDelegation(rough_time_t mint, rough_time_t maxt);
   void MakeDelegation() { MakeDelegation(999, 1001); }
   void MakeCertificate(const uint8_t* private_key);
   void MakeCertificate() { MakeCertificate(root_private_key); }
   void MakeTree(uint32_t index);
   void MakeTree() { MakeTree(0); }
-  void MakeSigned(uint64_t now);
+  void MakeSigned(rough_time_t now);
   void MakeSigned() { MakeSigned(1000); }
   void MakeResponse(const uint8_t* private_key);
   void MakeResponse() { MakeResponse(delegated_private_key); }
@@ -100,7 +100,7 @@ ResponseBuilder::ResponseBuilder() {
   ED25519_keypair(root_public_key, root_private_key);
 }
 
-void ResponseBuilder::MakeDelegation(uint64_t mint, uint64_t maxt) {
+void ResponseBuilder::MakeDelegation(rough_time_t mint, rough_time_t maxt) {
   Builder builder(delegation, arraysize(delegation), 3);
   ASSERT_TRUE(builder.AddTagData(kTagPUBK, delegated_public_key,
                                  arraysize(delegated_public_key)));
@@ -142,7 +142,7 @@ void ResponseBuilder::MakeTree(uint32_t i) {
   }
 }
 
-void ResponseBuilder::MakeSigned(uint64_t now) {
+void ResponseBuilder::MakeSigned(rough_time_t now) {
   Builder builder(signed_response, arraysize(signed_response), 3);
   static const uint32_t kRadius = 1000000;
   builder.AddTagData(kTagRADI, reinterpret_cast<const uint8_t*>(&kRadius),
