@@ -16,4 +16,6 @@ If you see an error about `_FORTIFY_SOURCE requires compiling with optimization`
 
 ## Go
 
-The Roughtime Go code works with `go get`, as is typical for Go code. For example, `go get https://roughtime.googlesource.com/roughtime/go/client` and run `client --servers-file=roughtime/roughtime-servers.json --chain-file=~/roughtime-chain.json`.
+In the `src` directory of your [workspace](https://golang.org/doc/code.html), do `git clone https://roughtime.googlesource.com/roughtime roughtime.googlesource.com`. Then, `go build` will work as usual in the subdirectories of `roughtime.googlesource.com/go`.
+
+For example, in `client`, run `go build` and then `./client --servers-file=../../roughtime-servers.json --chain-file=$HOME/roughtime-chain.json`.
