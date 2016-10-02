@@ -10,7 +10,7 @@ The header of a message looks like:
 
 ```
 uint32 num_tags
-uint32 offsets[min(0, num_tags-1)]
+uint32 offsets[max(0, num_tags-1)]
 uint32 tags[num_tags]
 ```
 
