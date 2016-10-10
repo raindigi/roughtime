@@ -21,6 +21,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
+	"math"
 	"sort"
 
 	"golang.org/x/crypto/ed25519"
@@ -82,7 +83,7 @@ func Encode(msg map[uint32][]byte) ([]byte, error) {
 		return make([]byte, 4), nil
 	}
 
-	if len(msg) >= 1<<32 {
+	if len(msg) >= math.MaxInt32 {
 		return nil, errors.New("encode: too many tags")
 	}
 
@@ -156,7 +157,7 @@ func Decode(bytes []byte) (map[uint32][]byte, error) {
 	tags := bytes[4*(1+numTags-1):]
 	payloads := bytes[4*(1+(numTags-1)+numTags):]
 
-	if len(payloads) > 1<<32 {
+	if len(payloads) > math.MaxInt32 {
 		return nil, errors.New("decode: message too large")
 	}
 	payloadLength := uint32(len(payloads))
