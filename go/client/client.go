@@ -201,6 +201,7 @@ func (s *timeSample) midpoint() *big.Int {
 // alignTo updates s so that its base value matches that from reference.
 func (s *timeSample) alignTo(reference *timeSample) {
 	delta := new(big.Int).Sub(s.base, reference.base)
+	delta.Div(delta, big.NewInt(int64(time.Microsecond)))
 	s.base.Sub(s.base, delta)
 	s.min.Sub(s.min, delta)
 	s.max.Sub(s.max, delta)
