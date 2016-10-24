@@ -190,6 +190,10 @@ type timeSample struct {
 	// max is the maximum real-time (in Roughtime UTC microseconds) that
 	// could correspond to |base| (i.e. midpoint + radius + query time).
 	max *big.Int
+
+	// queryDuration contains the amount of time that the server took to
+	// answer the query.
+	queryDuration time.Duration
 }
 
 // midpoint returns the average of the min and max times.
@@ -298,7 +302,7 @@ func (c *Client) query(server *config.Server, chain *config.Chain) (*timeSample,
 		Reply:         reply,
 	})
 
-	queryDurationBig := new(big.Int).SetInt64(int64(queryDuration/time.Microsecond))
+	queryDurationBig := new(big.Int).SetInt64(int64(queryDuration / time.Microsecond))
 	bigRadius := new(big.Int).SetUint64(uint64(radius))
 	min := new(big.Int).SetUint64(midpoint)
 	min.Sub(min, bigRadius)
@@ -308,10 +312,11 @@ func (c *Client) query(server *config.Server, chain *config.Chain) (*timeSample,
 	max.Add(max, bigRadius)
 
 	return &timeSample{
-		server: server,
-		base:   new(big.Int).SetInt64(int64(baseTime)),
-		min:    min,
-		max:    max,
+		server:        server,
+		base:          new(big.Int).SetInt64(int64(baseTime)),
+		min:           min,
+		max:           max,
+		queryDuration: queryDuration,
 	}, nil
 }
 
@@ -463,10 +468,24 @@ type TimeResult struct {
 	// ServerErrors maps from server name to query error.
 	ServerErrors map[string]error
 
+	// ServerInfo contains information about each server that was queried.
+	ServerInfo map[string]ServerInfo
+
 	// OutOfRangeAnswer is true if one or more of the queries contained a
 	// significantly incorrect time, as defined by MaxDifference. In this
 	// case, the reply will have been recorded in the chain.
 	OutOfRangeAnswer bool
+}
+
+// ServerInfo contains information from a specific server.
+type ServerInfo struct {
+	// QueryDuration is the amount of time that the server took to answer.
+	QueryDuration time.Duration
+
+	// Min and Max specify the time window given by the server. These
+	// values have been adjusted so that they are comparible across
+	// servers, even though they are queried at different times.
+	Min, Max *big.Int
 }
 
 // EstablishTime queries a number of servers until it has a quorum of
@@ -495,6 +514,15 @@ func (c *Client) EstablishTime(chain *config.Chain, quorum int, servers []config
 			sample.alignTo(samples[0])
 		}
 		samples = append(samples, sample)
+
+		if result.ServerInfo == nil {
+			result.ServerInfo = make(map[string]ServerInfo)
+		}
+		result.ServerInfo[server.Name] = ServerInfo{
+			QueryDuration: sample.queryDuration,
+			Min:           sample.min,
+			Max:           sample.max,
+		}
 
 		var ok bool
 		if intersection, ok = findNOverlapping(samples, quorum); ok {

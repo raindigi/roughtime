@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"roughtime.googlesource.com/go/client/monotime"
@@ -79,6 +80,17 @@ func do() error {
 
 	for serverName, err := range result.ServerErrors {
 		fmt.Fprintf(os.Stderr, "Failed to query %q: %s\n", serverName, err)
+	}
+
+	maxLenServerName := 0
+	for name := range result.ServerInfo {
+		if len(name) > maxLenServerName {
+			maxLenServerName = len(name)
+		}
+	}
+
+	for name, info := range result.ServerInfo {
+		fmt.Printf("%s:%s %d–%d (answered in %s)\n", name, strings.Repeat(" ", maxLenServerName-len(name)), info.Min, info.Max, info.QueryDuration)
 	}
 
 	if result.MonoUTCDelta == nil {
