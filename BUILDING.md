@@ -2,7 +2,7 @@
 
 ## C++
 
-The Roughtime C++ code is built using [Bazel](https://www.bazel.io/). Everything should build on Linux. On MacOS, `simple_client` should build.
+The Roughtime C++ code is built using [Bazel](https://www.bazel.io/). Everything should build on Linux and macOS, `simple_client` should build.
 
 In order to build, install Bazel and run `bazel build ... && bazel test ...`. That should download and build BoringSSL, gTest and Protocol Buffers automatically.
 

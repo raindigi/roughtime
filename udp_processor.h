@@ -25,6 +25,14 @@
 
 namespace roughtime {
 
+#if defined(__MACH__)
+struct mmsghdr {
+  uint8_t *iov_base;
+  size_t msg_len;
+  msghdr msg_hdr;
+};
+#endif
+
 // UdpProcessor manages a set of receive buffers for processing UDP requests.
 class UdpProcessor {
  public:

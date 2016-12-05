@@ -110,6 +110,32 @@ void UdpProcessor::Reset() {
   }
 }
 
+#if defined(__MACH__)
+static const unsigned MSG_WAITFORONE = 0;
+
+static int recvmmsg(int fd, struct mmsghdr *msgvec, unsigned vlen,
+                    unsigned flags, struct timespec *timeout) {
+  ssize_t r = recvmsg(fd, &msgvec->msg_hdr, 0);
+  if (r < 0) {
+    return r;
+  }
+
+  msgvec->msg_len = r;
+  return 1;
+}
+
+int sendmmsg(int fd, struct mmsghdr *msgvec, unsigned vlen, unsigned flags) {
+  GOOGLE_CHECK_EQ(1, vlen);
+  ssize_t r = sendmsg(fd, &msgvec->msg_hdr, 0);
+  if (r < 0) {
+    return r;
+  }
+
+  msgvec->msg_len = r;
+  return 1;
+}
+#endif
+
 bool UdpProcessor::ProcessBatch(int fd, Server *server, Stats *out_stats) {
   server->Reset();
   memset(out_stats, 0, sizeof(Stats));

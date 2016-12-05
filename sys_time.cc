@@ -14,16 +14,33 @@
 
 #include "sys_time.h"
 
+#if defined(__MACH__)
+#include <sys/time.h>
+#else
 #include <time.h>
+#endif
 
 #include <google/protobuf/stubs/logging.h>
 
 namespace roughtime {
 
+static const uint32_t kOneSecondRadius = 1000000;
+
 SystemTimeSource::SystemTimeSource() {}
 
 SystemTimeSource::~SystemTimeSource() {}
 
+#if defined(__MACH__)
+std::pair<rough_time_t, uint32_t> SystemTimeSource::Now() {
+  struct timeval tv;
+  GOOGLE_CHECK_EQ(0, gettimeofday(&tv, nullptr));
+  uint64_t now = tv.tv_sec;
+  now *= 1000000;
+  now += tv.tv_usec;
+
+  return std::make_pair(now, kOneSecondRadius);
+}
+#else
 std::pair<rough_time_t, uint32_t> SystemTimeSource::Now() {
   struct timespec ts;
   GOOGLE_CHECK_EQ(0, clock_gettime(CLOCK_REALTIME_COARSE, &ts));
@@ -31,7 +48,8 @@ std::pair<rough_time_t, uint32_t> SystemTimeSource::Now() {
   now *= 1000000;
   now += ts.tv_nsec / 1000;
 
-  return std::make_pair(now, 1000000);
+  return std::make_pair(now, kOneSecondRadius);
 }
+#endif
 
 }  // namespace roughtime
