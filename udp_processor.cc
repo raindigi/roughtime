@@ -17,8 +17,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include <google/protobuf/stubs/logging.h>
 
+#include "logging.h"
 #include "open_source_fillins.h"
 
 namespace roughtime {
@@ -67,7 +67,7 @@ bool UdpProcessor::MakeSocket(int port, int *out_sock, uint16_t *out_port) {
 
   const int fd = socket(AF_INET6, SOCK_DGRAM, 0);
   if (fd == -1) {
-    GOOGLE_PLOG(ERROR) << "socket";
+    ROUGHTIME_PLOG(ERROR) << "socket";
     return false;
   }
 
@@ -77,14 +77,14 @@ bool UdpProcessor::MakeSocket(int port, int *out_sock, uint16_t *out_port) {
   sin6.sin6_addr = in6addr_any;
   sin6.sin6_port = htons(port);
   if (bind(fd, reinterpret_cast<sockaddr *>(&sin6), sizeof(sin6))) {
-    GOOGLE_PLOG(ERROR) << "bind";
+    ROUGHTIME_PLOG(ERROR) << "bind";
     close(fd);
     return false;
   }
 
   socklen_t sin6_len = sizeof(sin6);
   if (getsockname(fd, reinterpret_cast<sockaddr *>(&sin6), &sin6_len)) {
-    GOOGLE_PLOG(ERROR) << "getsockname";
+    ////ROUGHTIME_PLOG(ERROR) << "getsockname";
     close(fd);
     return false;
   }
@@ -125,7 +125,7 @@ static int recvmmsg(int fd, struct mmsghdr *msgvec, unsigned vlen,
 }
 
 int sendmmsg(int fd, struct mmsghdr *msgvec, unsigned vlen, unsigned flags) {
-  GOOGLE_CHECK_EQ(1, vlen);
+  ROUGHTIME_CHECK_EQ(1, vlen);
   ssize_t r = sendmsg(fd, &msgvec->msg_hdr, 0);
   if (r < 0) {
     return r;
@@ -148,7 +148,7 @@ bool UdpProcessor::ProcessBatch(int fd, Server *server, Stats *out_stats) {
   } while (r == -1 && errno == EINTR);
 
   if (r < 0) {
-    GOOGLE_PLOG(ERROR) << "recvmmsg";
+    ROUGHTIME_PLOG(ERROR) << "recvmmsg";
     return false;
   } else if (r == 0) {
     return true;
@@ -186,7 +186,7 @@ bool UdpProcessor::ProcessBatch(int fd, Server *server, Stats *out_stats) {
   for (size_t i = 0; i < index; i++) {
     size_t reply_len;
     if (!server->MakeResponse(send_buf_[i], &reply_len, i)) {
-      GOOGLE_LOG(ERROR) << "failed to assemble responses";
+      ROUGHTIME_LOG(ERROR) << "failed to assemble responses";
       return false;
     }
     requests_processed_++;
@@ -195,7 +195,7 @@ bool UdpProcessor::ProcessBatch(int fd, Server *server, Stats *out_stats) {
     if (MaybeBreakResponse(broken_output_buf, &reply_len,
                            sizeof(broken_output_buf), send_buf_[i], reply_len,
                            recv_buf_[i], recv_mmsghdrs_[i].msg_len)) {
-      GOOGLE_DCHECK_LE(reply_len, sizeof(broken_output_buf));
+      ROUGHTIME_DCHECK_LE(reply_len, sizeof(broken_output_buf));
       memcpy(send_buf_[i], broken_output_buf, reply_len);
     }
 
@@ -209,10 +209,10 @@ bool UdpProcessor::ProcessBatch(int fd, Server *server, Stats *out_stats) {
   } while (messages_sent == -1 && errno == EINTR);
 
   if (messages_sent == -1) {
-    GOOGLE_PLOG(ERROR) << "sendmmsg";
+    ROUGHTIME_PLOG(ERROR) << "sendmmsg";
     return false;
   }
-  GOOGLE_LOG_IF_EVERY_N_SEC(ERROR, (static_cast<size_t>(messages_sent) < index),
+  ROUGHTIME_LOG_IF_EVERY_N_SEC(ERROR, (static_cast<size_t>(messages_sent) < index),
                             30)
       << "only " << messages_sent << " of " << index << " messages were sent";
 

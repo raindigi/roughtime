@@ -18,9 +18,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <google/protobuf/stubs/logging.h>
 #include <openssl/curve25519.h>
 
+#include "logging.h"
 #include "protocol.h"
 #include "server.h"
 
@@ -52,7 +52,7 @@ Server::Server(std::unique_ptr<Identity> identity,
 }
 
 bool Server::AddRequest(const uint8_t *packet, size_t len) {
-  GOOGLE_DCHECK_LE(num_leaves_, kBatchSize);
+  ROUGHTIME_DCHECK_LE(num_leaves_, kBatchSize);
 
   if (len < kMinRequestSize) {
     return false;
@@ -76,7 +76,7 @@ bool Server::AddRequest(const uint8_t *packet, size_t len) {
 }
 
 bool Server::Sign() {
-  GOOGLE_DCHECK_GT(num_leaves_, 0);
+  ROUGHTIME_DCHECK_GT(num_leaves_, 0ul);
 
   // The signature is over the root hash and the timestamp---that's it!
   tree_.Build(num_leaves_);
@@ -96,15 +96,15 @@ bool Server::Sign() {
           kTagMIDP, reinterpret_cast<const uint8_t *>(&now), sizeof(now)) ||
       !to_be_signed.AddTagData(kTagROOT, tree_.GetRoot(), kNonceLength) ||
       !to_be_signed.Finish(&to_be_signed_len)) {
-    GOOGLE_LOG(ERROR) << "failed to construct to_be_signed";
+    ROUGHTIME_LOG(ERROR) << "failed to construct to_be_signed";
     return false;
   }
-  GOOGLE_CHECK_EQ(to_be_signed_len, kToBeSignedSize);
+  ROUGHTIME_CHECK_EQ(to_be_signed_len, kToBeSignedSize);
 
   if (!ED25519_sign(signature_, to_be_signed_with_context_,
                     sizeof(to_be_signed_with_context_),
                     identity_->private_key)) {
-    GOOGLE_LOG(ERROR) << "signature failure";
+    ROUGHTIME_LOG(ERROR) << "signature failure";
     return false;
   }
   return true;
@@ -112,7 +112,7 @@ bool Server::Sign() {
 
 bool Server::MakeResponse(uint8_t *out_response, size_t *out_len,
                           uint32_t index) {
-  GOOGLE_DCHECK_LT(index, num_leaves_);
+  ROUGHTIME_DCHECK_LT(index, num_leaves_);
   static_assert(kMaxResponseSize <= kMaxRecvPacketSize,
                 "Receive buffers are too small to use as send buffers");
   Builder response(out_response, kMaxResponseSize, 5);
@@ -129,7 +129,7 @@ bool Server::MakeResponse(uint8_t *out_response, size_t *out_len,
       !response.AddTagData(kTagCERT, identity_->certificate, kCertSize) ||
       !response.AddTagData(kTagINDX, pindex, sizeof(index)) ||
       !response.Finish(out_len)) {
-    GOOGLE_LOG(ERROR) << "failed to construct response";
+    ROUGHTIME_LOG(ERROR) << "failed to construct response";
     return false;
   }
 
@@ -142,7 +142,7 @@ bool CreateCertificate(uint8_t out_cert[kCertSize],
                        const uint8_t root_private_key[ED25519_PRIVATE_KEY_LEN],
                        rough_time_t start_time, rough_time_t end_time,
                        const uint8_t public_key[ED25519_PUBLIC_KEY_LEN]) {
-  GOOGLE_CHECK_LT(start_time, end_time);
+  ROUGHTIME_CHECK_LT(start_time, end_time);
   uint8_t to_be_signed_bytes[sizeof(kCertContextString) + kToBeSignedCertSize];
   size_t to_be_signed_len;
   memcpy(to_be_signed_bytes, kCertContextString, sizeof(kCertContextString));
@@ -158,15 +158,15 @@ bool CreateCertificate(uint8_t out_cert[kCertSize],
       !to_be_signed.AddTagData(kTagMAXT, reinterpret_cast<uint8_t *>(&end_time),
                                sizeof(end_time)) ||
       !to_be_signed.Finish(&to_be_signed_len)) {
-    GOOGLE_LOG(ERROR) << "failed to construct signed portion of certificate";
+    ROUGHTIME_LOG(ERROR) << "failed to construct signed portion of certificate";
     return false;
   }
-  GOOGLE_CHECK_EQ(to_be_signed_len, kToBeSignedCertSize);
+  ROUGHTIME_CHECK_EQ(to_be_signed_len, kToBeSignedCertSize);
 
   uint8_t signature[ED25519_SIGNATURE_LEN];
   if (!ED25519_sign(signature, to_be_signed_bytes, sizeof(to_be_signed_bytes),
                     root_private_key)) {
-    GOOGLE_LOG(ERROR) << "failed to sign certificate";
+    ROUGHTIME_LOG(ERROR) << "failed to sign certificate";
     return false;
   }
 
@@ -179,15 +179,15 @@ bool CreateCertificate(uint8_t out_cert[kCertSize],
                        to_be_signed_bytes + sizeof(kCertContextString),
                        to_be_signed_len) ||
       !cert.Finish(&cert_len)) {
-    GOOGLE_LOG(ERROR) << "failed to construct certificate";
+    ROUGHTIME_LOG(ERROR) << "failed to construct certificate";
     return false;
   }
-  GOOGLE_CHECK_EQ(cert_len, kCertSize);
+  ROUGHTIME_CHECK_EQ(cert_len, kCertSize);
   return true;
 }
 
 void Tree::Build(size_t num_nodes) {
-  GOOGLE_DCHECK_GT(num_nodes, 0);
+  ROUGHTIME_DCHECK_GT(num_nodes, 0ul);
   size_t level;
   for (level = 0; num_nodes > 1; level++, num_nodes /= 2) {
     // Even out the level with a dummy node, if need be.
@@ -199,7 +199,7 @@ void Tree::Build(size_t num_nodes) {
       HashNode(tree_[level + 1][i / 2], tree_[level][i], tree_[level][i + 1]);
     }
   }
-  GOOGLE_DCHECK_EQ(1, num_nodes);  // Root node.
+  ROUGHTIME_DCHECK_EQ(1ul, num_nodes);  // Root node.
   levels_ = level + 1;
 }
 
@@ -215,7 +215,7 @@ void Tree::GetPath(uint8_t *out_path, size_t index) {
     out_path += kNonceLength;
     index /= 2;
   }
-  GOOGLE_DCHECK_EQ(0, index);
+  ROUGHTIME_DCHECK_EQ(0ul, index);
 }
 
 BrokenReplyGenerator::~BrokenReplyGenerator() {}

@@ -20,7 +20,7 @@
 #include <time.h>
 #endif
 
-#include <google/protobuf/stubs/logging.h>
+#include "logging.h"
 
 namespace roughtime {
 
@@ -33,7 +33,7 @@ SystemTimeSource::~SystemTimeSource() {}
 #if defined(__MACH__)
 std::pair<rough_time_t, uint32_t> SystemTimeSource::Now() {
   struct timeval tv;
-  GOOGLE_CHECK_EQ(0, gettimeofday(&tv, nullptr));
+  ROUGHTIME_CHECK_EQ(0, gettimeofday(&tv, nullptr));
   uint64_t now = tv.tv_sec;
   now *= 1000000;
   now += tv.tv_usec;
@@ -43,7 +43,7 @@ std::pair<rough_time_t, uint32_t> SystemTimeSource::Now() {
 #else
 std::pair<rough_time_t, uint32_t> SystemTimeSource::Now() {
   struct timespec ts;
-  GOOGLE_CHECK_EQ(0, clock_gettime(CLOCK_REALTIME_COARSE, &ts));
+  ROUGHTIME_CHECK_EQ(0, clock_gettime(CLOCK_REALTIME_COARSE, &ts));
   uint64_t now = ts.tv_sec;
   now *= 1000000;
   now += ts.tv_nsec / 1000;

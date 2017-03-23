@@ -18,7 +18,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <google/protobuf/stubs/macros.h>
 #include <openssl/curve25519.h>
 
 namespace roughtime {

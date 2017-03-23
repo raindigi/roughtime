@@ -20,12 +20,11 @@
 #include <errno.h>
 #include <memory>
 
-#include <google/protobuf/stubs/logging.h>
-#include <google/protobuf/stubs/macros.h>
+#include "logging.h"
 
-#define GOOGLE_PLOG(level) GOOGLE_LOG(level) << strerror(errno) << ": "
-#define GOOGLE_LOG_IF_EVERY_N_SEC(level, condition, time) \
-  GOOGLE_LOG_IF(level, condition)
+#define ROUGHTIME_PLOG(level) ROUGHTIME_LOG(level) << strerror(errno) << ": "
+#define ROUGHTIME_LOG_IF_EVERY_N_SEC(level, condition, time) \
+  ROUGHTIME_LOG_IF(level, condition)
 
 #if !defined(arraysize)
 template <typename T, size_t N>

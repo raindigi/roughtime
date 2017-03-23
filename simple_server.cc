@@ -14,9 +14,9 @@
 
 #include "simple_server.h"
 
-#include <google/protobuf/stubs/logging.h>
 #include <openssl/curve25519.h>
 
+#include "logging.h"
 #include "server.h"
 
 namespace roughtime {
@@ -40,7 +40,7 @@ void SimpleServer::RunUntilError() {
 std::unique_ptr<Identity> SimpleServer::MakeIdentity(
     const uint8_t root_private_key[ED25519_PRIVATE_KEY_LEN], rough_time_t mint,
     rough_time_t maxt) {
-  GOOGLE_CHECK(mint <= maxt);
+  ROUGHTIME_CHECK(mint <= maxt);
   uint8_t delegated_private_key[ED25519_PRIVATE_KEY_LEN];
   uint8_t delegated_public_key[ED25519_PUBLIC_KEY_LEN];
   ED25519_keypair(delegated_public_key, delegated_private_key);

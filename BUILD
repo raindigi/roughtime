@@ -4,12 +4,18 @@ load(
 )
 
 cc_library(
+    name = "roughtime_logging",
+    hdrs = ["logging.h"],
+    deps = ["@protobuf//:protobuf"],
+)
+
+cc_library(
     name = "protocol",
     srcs = ["protocol.cc"],
     hdrs = ["protocol.h"],
     deps = [
+        ":roughtime_logging",
         "@boringssl//:crypto",
-        "@protobuf//:protobuf",
     ],
 )
 
@@ -27,7 +33,10 @@ cc_library(
     name = "client",
     srcs = ["client.cc"],
     hdrs = ["client.h"],
-    deps = [":protocol"],
+    deps = [
+        ":protocol",
+        ":roughtime_logging",
+    ],
 )
 
 cc_test(
@@ -54,6 +63,7 @@ cc_library(
     deps = [
         ":protocol",
         ":time_source",
+        ":roughtime_logging",
         "@boringssl//:crypto",
     ],
 )
@@ -100,6 +110,7 @@ cc_binary(
 cc_library(
     name = "open_source_fillins",
     hdrs = ["open_source_fillins.h"],
+    deps = [":roughtime_logging"],
     defines = ["ROUGHTIME_OPEN_SOURCE"],
 )
 
@@ -124,6 +135,7 @@ cc_library(
         ":protocol",
         ":server",
         ":time_source",
+        ":roughtime_logging",
     ],
 )
 
@@ -133,6 +145,6 @@ cc_library(
     hdrs = ["sys_time.h"],
     deps = [
         ":time_source",
-        "@protobuf//:protobuf",
+        ":roughtime_logging",
     ],
 )

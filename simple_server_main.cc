@@ -18,7 +18,9 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <stdio.h>
 
+#include "logging.h"
 #include "simple_server.h"
 #include "sys_time.h"
 
@@ -35,7 +37,7 @@ constexpr uint8_t root_private_key[ED25519_PRIVATE_KEY_LEN] = {
 
 int main(int argc, char **argv) {
   int requested_port = -1;
-
+  ROUGHTIME_INIT_LOGGER(argv[0]);
   if (argc == 2) {
     char *endptr;
     requested_port = strtoul(argv[1], &endptr, 10);

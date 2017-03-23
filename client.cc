@@ -16,10 +16,10 @@
 
 #include <stdint.h>
 
-#include <google/protobuf/stubs/logging.h>
 #include <openssl/curve25519.h>
 
 #include "client.h"
+#include "logging.h"
 
 namespace roughtime {
 
@@ -32,10 +32,10 @@ std::string CreateRequest(const uint8_t nonce[kNonceLength]) {
   uint8_t* padding;
 
   static_assert(kTagNONC < kTagPAD, "Tags must be written in order");
-  GOOGLE_CHECK(query.AddTagData(kTagNONC, nonce, kNonceLength) &&
+  ROUGHTIME_CHECK(query.AddTagData(kTagNONC, nonce, kNonceLength) &&
                query.AddTag(&padding, kTagPAD, kPaddingLen) &&
                query.Finish(&query_len));
-  GOOGLE_CHECK_EQ(query_len, sizeof(query_bytes));
+  ROUGHTIME_CHECK_EQ(query_len, sizeof(query_bytes));
 
   memset(padding, 0, kPaddingLen);
 

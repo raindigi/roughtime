@@ -23,8 +23,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <google/protobuf/stubs/logging.h>
 #include <openssl/sha.h>
+
+#include "logging.h"
 
 namespace roughtime {
 

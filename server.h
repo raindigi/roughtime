@@ -18,7 +18,6 @@
 #include <memory>
 #include <utility>
 
-#include <google/protobuf/stubs/macros.h>
 
 #include "protocol.h"
 #include "time_source.h"
