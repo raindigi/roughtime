@@ -8,7 +8,7 @@ git_repository(
 
 git_repository(
     name = "protobuf",
-    commit = "v3.0.0",
+    commit = "v3.2.0",
     remote = "https://github.com/google/protobuf",
 )
 
