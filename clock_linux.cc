@@ -13,7 +13,7 @@
  * limitations under the License. */
 
 
-#if defined(__linux) || defined (__fuchsia__)
+#if defined(__linux) || defined (__Fuchsia__)
 
 #include <stdint.h>
 #include <stdlib.h>

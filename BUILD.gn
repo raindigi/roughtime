@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+config("client_config") {
+  visibility = [ ":*" ]
+  include_dirs = [ "." ]
+}
+
 executable("simple_server") {
   sources = [
     "clock_linux.cc",
@@ -27,6 +32,20 @@ executable("simple_server") {
     "ROUGHTIME_OPEN_SOURCE",
   ]
   include_dirs = [ "." ]
+  deps = [
+    "//third_party/boringssl",
+    "//third_party/glog",
+  ]
+}
+
+static_library("client_lib") {
+  sources = [
+    "client.cc",
+    "clock_linux.cc",
+    "protocol.cc",
+  ]
+  defines = [ "USE_GLOG" ]
+  public_configs = [ ":client_config" ]
   deps = [
     "//third_party/boringssl",
     "//third_party/glog",
