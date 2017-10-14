@@ -89,7 +89,7 @@ func Encode(msg map[uint32][]byte) ([]byte, error) {
 
 	var payloadSum uint64
 	for _, payload := range msg {
-		if len(payload) % 4 != 0 {
+		if len(payload)%4 != 0 {
 			return nil, errors.New("encode: length of value is not a multiple of four")
 		}
 		payloadSum += uint64(len(payload))
@@ -139,7 +139,7 @@ func Decode(bytes []byte) (map[uint32][]byte, error) {
 	if len(bytes) < 4 {
 		return nil, errors.New("decode: message too short to be valid")
 	}
-	if len(bytes) % 4 != 0 {
+	if len(bytes)%4 != 0 {
 		return nil, errors.New("decode: message is not a multiple of four bytes")
 	}
 
@@ -149,13 +149,15 @@ func Decode(bytes []byte) (map[uint32][]byte, error) {
 		return make(map[uint32][]byte), nil
 	}
 
-	if uint64(len(bytes)) < 4*((numTags-1)+numTags) {
+	minLen := 4 * (1 + (numTags - 1) + numTags)
+
+	if uint64(len(bytes)) < minLen {
 		return nil, errors.New("decode: message too short to be valid")
 	}
 
 	offsets := bytes[4:]
 	tags := bytes[4*(1+numTags-1):]
-	payloads := bytes[4*(1+(numTags-1)+numTags):]
+	payloads := bytes[minLen:]
 
 	if len(payloads) > math.MaxInt32 {
 		return nil, errors.New("decode: message too large")
