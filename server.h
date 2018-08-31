@@ -18,7 +18,6 @@
 #include <memory>
 #include <utility>
 
-
 #include "protocol.h"
 #include "time_source.h"
 
@@ -27,12 +26,12 @@ namespace roughtime {
 // kToBeSignedCertSize is the size of the signed portion (DELE) of a
 // certificate.  Its tags are (PUBK, MINT, MAXT).
 constexpr size_t kToBeSignedCertSize = MessageHeaderLen(3) +
-                                       ED25519_PUBLIC_KEY_LEN + kTimestampSize +
+                                       kPublicKeyLength + kTimestampSize +
                                        kTimestampSize;
 
 // kCertSize is the size of the entire certificate.  Its tags are (DELE, SIG).
 constexpr size_t kCertSize =
-    MessageHeaderLen(2) + ED25519_SIGNATURE_LEN + kToBeSignedCertSize;
+    MessageHeaderLen(2) + kSignatureLength + kToBeSignedCertSize;
 
 // CreateCertificate signs the supplied |public_key| using |root_private_key|,
 // and sets |out_cert| to a certificate containing the public key, the
@@ -40,14 +39,14 @@ constexpr size_t kCertSize =
 // otherwise false.
 // TODO(mab): Find better home for this, likely in an offline tool.
 bool CreateCertificate(uint8_t out_cert[kCertSize],
-                       const uint8_t root_private_key[ED25519_PRIVATE_KEY_LEN],
+                       const uint8_t root_private_key[kPrivateKeyLength],
                        rough_time_t start_time, rough_time_t end_time,
-                       const uint8_t public_key[ED25519_PUBLIC_KEY_LEN]);
+                       const uint8_t public_key[kPublicKeyLength]);
 
 // Identity is a server's private key and certificate.  (The certificate is the
 // server's public key signed by an offline private master key.)
 struct Identity {
-  uint8_t private_key[ED25519_PRIVATE_KEY_LEN];
+  uint8_t private_key[kPrivateKeyLength];
   uint8_t certificate[kCertSize];
 };
 
@@ -118,7 +117,7 @@ constexpr size_t kToBeSignedSize =
 
 // kMaxResponseSize is the size of the largest possible server response.
 constexpr size_t kMaxResponseSize =
-    MessageHeaderLen(5) + kCertSize + kToBeSignedSize + ED25519_SIGNATURE_LEN +
+    MessageHeaderLen(5) + kCertSize + kToBeSignedSize + kSignatureLength +
     (kBatchSizeLog2 * kNonceLength) + sizeof(uint32_t) /* index */;
 
 class Server {
@@ -163,7 +162,7 @@ class Server {
   uint8_t* const to_be_signed_;
 
   // Signature is the ED25519 signature over |to_be_signed_with_context_|.
-  uint8_t signature_[ED25519_SIGNATURE_LEN];
+  uint8_t signature_[kSignatureLength];
 };
 
 // BrokenReplyGenerator is an interface for generating replies that are broken

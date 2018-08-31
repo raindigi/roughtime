@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include <openssl/sha.h>
+#include <openssl/curve25519.h>
 
 #include "logging.h"
 
@@ -31,6 +32,15 @@ namespace roughtime {
 
 static_assert(BYTE_ORDER == LITTLE_ENDIAN,
               "This code assumes little-endian processors");
+
+// The OpenSSL constants are kept out of the headers to allow consumers to
+// avoid needing OpenSSL's at build time, but the values should still match.
+static_assert(kPrivateKeyLength == ED25519_PRIVATE_KEY_LEN,
+              "Private key length mismatch");
+static_assert(kPublicKeyLength == ED25519_PUBLIC_KEY_LEN,
+              "Public key length mismatch");
+static_assert(kSignatureLength == ED25519_SIGNATURE_LEN,
+              "Signature length mismatch");
 
 static void advance(const uint8_t **ptr, size_t *len, size_t bytes) {
   *ptr += bytes;

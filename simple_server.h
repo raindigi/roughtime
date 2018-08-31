@@ -47,7 +47,7 @@ class SimpleServer {
   // MakeIdentity creates a dummy server certificate that is valid for the
   // given time range.
   static std::unique_ptr<Identity> MakeIdentity(
-      const uint8_t root_private_key[ED25519_PRIVATE_KEY_LEN],
+      const uint8_t root_private_key[kPrivateKeyLength],
       rough_time_t mint, rough_time_t maxt);
 
  private:

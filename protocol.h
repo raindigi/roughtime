@@ -18,8 +18,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <openssl/curve25519.h>
-
 namespace roughtime {
 
 // Minimum size of a time request.  Requests must be padded to larger than their
@@ -31,6 +29,12 @@ constexpr size_t kNonceLength = 64;  // Size of the client's nonce.
 constexpr size_t kTimestampSize = 8;  // Size of the server's time.
 
 constexpr size_t kRadiusSize = 4;  // Size of the server's uncertainty.
+
+constexpr size_t kPrivateKeyLength = 64; // Size of the server's private key.
+
+constexpr size_t kPublicKeyLength = 32; // Size of the server's public key.
+
+constexpr size_t kSignatureLength = 64; // Size of server signatures.
 
 typedef uint32_t tag_t;
 
