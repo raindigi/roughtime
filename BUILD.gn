@@ -20,18 +20,36 @@ config("client_config") {
 executable("simple_server") {
   sources = [
     "clock_linux.cc",
-    "protocol.cc",
-    "server.cc",
-    "simple_server.cc",
     "simple_server_main.cc",
     "sys_time.cc",
-    "udp_processor.cc",
   ]
   defines = [
     "USE_GLOG",
     "ROUGHTIME_OPEN_SOURCE",
   ]
   include_dirs = [ "." ]
+  deps = [
+    ":simple_server_lib",
+    "//third_party/boringssl",
+    "//third_party/glog",
+  ]
+}
+
+static_library("simple_server_lib") {
+  sources = [
+    "protocol.cc",
+    "server.cc",
+    "simple_server.cc",
+    "simple_server.h",
+    "udp_processor.cc",
+    "udp_processor.h",
+  ]
+  defines = [
+    "USE_GLOG",
+    "ROUGHTIME_OPEN_SOURCE",
+  ]
+  include_dirs = [ "." ]
+  public_configs = [ ":client_config" ]
   deps = [
     "//third_party/boringssl",
     "//third_party/glog",
