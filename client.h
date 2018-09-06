@@ -30,7 +30,7 @@ std::string CreateRequest(const uint8_t nonce[kNonceLength]);
 // and a certificate signed with a private key that matches |root_public_key|.
 bool ParseResponse(uint64_t *out_time, uint32_t *out_radius,
                    std::string *out_error,
-                   const uint8_t root_public_key[ED25519_PUBLIC_KEY_LEN],
+                   const uint8_t root_public_key[kPublicKeyLength],
                    const uint8_t *response_bytes, size_t response_len,
                    const uint8_t nonce[kNonceLength]);
 
