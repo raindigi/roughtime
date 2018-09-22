@@ -25,7 +25,7 @@
 
 namespace roughtime {
 
-#if defined(__MACH__)
+#if defined(__MACH__) || defined(__Fuchsia__)
 struct mmsghdr {
   uint8_t *iov_base;
   size_t msg_len;

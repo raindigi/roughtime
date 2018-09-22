@@ -112,7 +112,9 @@ void UdpProcessor::Reset() {
 
 #if defined(__MACH__)
 static const unsigned MSG_WAITFORONE = 0;
+#endif
 
+#if defined(__MACH__) || defined(__Fuchsia__)
 static int recvmmsg(int fd, struct mmsghdr *msgvec, unsigned vlen,
                     unsigned flags, struct timespec *timeout) {
   ssize_t r = recvmsg(fd, &msgvec->msg_hdr, 0);
@@ -125,7 +127,7 @@ static int recvmmsg(int fd, struct mmsghdr *msgvec, unsigned vlen,
 }
 
 int sendmmsg(int fd, struct mmsghdr *msgvec, unsigned vlen, unsigned flags) {
-  ROUGHTIME_CHECK_EQ(1, vlen);
+  ROUGHTIME_CHECK_EQ((unsigned) 1, vlen);
   ssize_t r = sendmsg(fd, &msgvec->msg_hdr, 0);
   if (r < 0) {
     return r;
